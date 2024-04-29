@@ -1,4 +1,4 @@
-# algorithm-start
+# ✨algorithm-start
 
 A small step into the world of algorithm.
 
