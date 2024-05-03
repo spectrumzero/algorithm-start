@@ -3,7 +3,7 @@
 #include <string.h>
 
 /*hash表默认大小*/
-#define HASHTABLE_CAPACITY 10
+#define HASHTABLE_CAPACITY 100
 
 /*键值对 key-value*/
 typedef struct pair
@@ -40,6 +40,11 @@ typedef struct arrayhash
 arrayhash *newhash()
 {
   arrayhash *hashtable = (arrayhash *)malloc(sizeof(arrayhash));
+  // 修改的源代码：添加以下循环。原来的构造函数并没有初始化hash表中的桶，运行时出现了段错误。
+  for (int i = 0; i < HASHTABLE_CAPACITY; i++)
+  {
+    hashtable->buckets[i] = NULL;
+  }
   return hashtable;
 }
 
@@ -259,9 +264,10 @@ int main()
   put(hashtable, 24815, "第五");
   put(hashtable, 24416, "世界");
   put(hashtable, 24417, "hello");
-  put(hashtable, 24418, "world");
+  put(hashtable, 24418, "World");
   put(hashtable, 24219, "start");
   put(hashtable, 24440, "algorithm");
+  put(hashtable, 24702, "问题解决");
   // 桶全部填满了。填满了才能保证获取操作正确。这个明天再补充。源代码的问题主要在key值上
   printf("\n打印完成后，hash表为\nKey -> Value\n");
   printhash(hashtable);
