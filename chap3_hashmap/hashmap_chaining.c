@@ -25,7 +25,7 @@ typedef struct node {
 } node;
 
 /*链式地址哈希表*/
-typedef struct hashtablechaining {
+typedef struct hashmapchaining {
   int size; // hash表实际数量，这里表示的是节点数量，准确说，键值对的数量。
   int capacity;     // hash表的容量，这里表示的是桶的数量
   double loadthres; // 触发扩容的负载因子阈值
@@ -50,27 +50,26 @@ typedef struct hashtablechaining {
   // bucket[i]是node*，而bucket是node**。
   // 由此，最后对键值对的访问，就变成了bucket[i]->pair->key，bucket[i]->pair->value
 
-} hashtablechaining;
+} hashmapchaining;
 
 /*构造函数*/
-hashtablechaining *newhashtable() {
-  hashtablechaining *hashtable =
-      (hashtablechaining *)malloc(sizeof(hashtablechaining));
-  hashtable->size = 0;
-  hashtable->capacity = 4;
-  hashtable->loadthres = 2.0 / 3.0;
-  hashtable->extendratio = 2;
-  hashtable->buckets = (node **)malloc(hashtable->capacity * sizeof(node *));
-  for (int i = 0; i < hashtable->capacity; i++) {
-    hashtable->buckets[i] = NULL; // 全部初始化为空桶
+hashmapchaining *newhashmap() {
+  hashmapchaining *hashmap = (hashmapchaining *)malloc(sizeof(hashmapchaining));
+  hashmap->size = 0;
+  hashmap->capacity = 4;
+  hashmap->loadthres = 2.0 / 3.0;
+  hashmap->extendratio = 2;
+  hashmap->buckets = (node **)malloc(hashmap->capacity * sizeof(node *));
+  for (int i = 0; i < hashmap->capacity; i++) {
+    hashmap->buckets[i] = NULL; // 全部初始化为空桶
   }
-  return hashtable;
+  return hashmap;
 }
 
 /*析构函数*/
-void delhashtable(hashtablechaining *hashtable) {
-  for (int i = 0; i < hashtable->capacity; i++) {
-    node *curbucket = hashtable->buckets[i];
+void delhashmap(hashmapchaining *hashmap) {
+  for (int i = 0; i < hashmap->capacity; i++) {
+    node *curbucket = hashmap->buckets[i];
     while (curbucket) {
       node *tmp = curbucket;
       curbucket = curbucket->nextnode;
@@ -78,25 +77,25 @@ void delhashtable(hashtablechaining *hashtable) {
       free(tmp);
     }
   }
-  free(hashtable->buckets);
-  free(hashtable);
+  free(hashmap->buckets);
+  free(hashmap);
 }
 
 /*hash函数*/
-int hashfunc(hashtablechaining *hashtable, int key) {
-  return key % hashtable->capacity;
+int hashfunc(hashmapchaining *hashmap, int key) {
+  return key % hashmap->capacity;
 }
 
 /*计算并获取当前的负载因子*/
-double loadfactor(hashtablechaining *hashtable) {
-  return (double)hashtable->size / (double)hashtable->capacity;
+double loadfactor(hashmapchaining *hashmap) {
+  return (double)hashmap->size / (double)hashmap->capacity;
 }
 
 /*查询操作*/
-char *get(hashtablechaining *hashtable, int key) {
-  int index = hashfunc(hashtable, key);
+char *get(hashmapchaining *hashmap, int key) {
+  int index = hashfunc(hashmap, key);
   // 遍历桶，若找到key，则返回对应的val
-  node *curbucket = hashtable->buckets[index];
+  node *curbucket = hashmap->buckets[index];
   //
   while (curbucket) {
     if (curbucket->pair->key == key) {
@@ -109,25 +108,25 @@ char *get(hashtablechaining *hashtable, int key) {
 
 /*添加操作*/
 // 因为添加操作实际上需要用到下面的扩容hash函数，所以这里只能写一个声明，而原型则应该写在扩容函数的后面。
-void put(hashtablechaining *hashtable, int key, const char *val);
+void put(hashmapchaining *hashmap, int key, const char *val);
 
 /*扩容hash表*/
-void extend(hashtablechaining *hashtable) {
-  // 暂存原来的hashtable
-  int oldcap = hashtable->capacity;
-  node **oldbuckets = hashtable->buckets;
-  // 初始化扩容后的新hashtable
-  hashtable->capacity *= hashtable->extendratio;
-  hashtable->buckets = (node **)malloc(sizeof(node *) * hashtable->capacity);
-  for (int i = 0; i < hashtable->capacity; i++) {
-    hashtable->buckets[i] = NULL;
+void extend(hashmapchaining *hashmap) {
+  // 暂存原来的hashmap
+  int oldcap = hashmap->capacity;
+  node **oldbuckets = hashmap->buckets;
+  // 初始化扩容后的新hashmap
+  hashmap->capacity *= hashmap->extendratio;
+  hashmap->buckets = (node **)malloc(sizeof(node *) * hashmap->capacity);
+  for (int i = 0; i < hashmap->capacity; i++) {
+    hashmap->buckets[i] = NULL;
   }
-  hashtable->size = 0;
+  hashmap->size = 0;
   // 将键值对从原来的hash表搬运至新的hash表
   for (int i = 0; i < oldcap; i++) {
     node *curbucket = oldbuckets[i];
     while (curbucket) {
-      put(hashtable, curbucket->pair->key, curbucket->pair->val);
+      put(hashmap, curbucket->pair->key, curbucket->pair->val);
       node *temp = curbucket;
       curbucket = curbucket->nextnode;
       // 释放内存
@@ -139,15 +138,15 @@ void extend(hashtablechaining *hashtable) {
 }
 
 /*添加键值对操作*/
-void put(hashtablechaining *hashtable, int key, const char *val) {
+void put(hashmapchaining *hashmap, int key, const char *val) {
   // 首先判断，当负载因子超过阈值的时候，则执行扩容
-  if (loadfactor(hashtable) > hashtable->loadthres) {
-    extend(hashtable);
+  if (loadfactor(hashmap) > hashmap->loadthres) {
+    extend(hashmap);
   }
-  int index = hashfunc(hashtable, key);
+  int index = hashfunc(hashmap, key);
   // 遍历这个桶(注意不是遍历hash表)。注意，一个又一个桶形成了数组，但单个桶里面放的是一个又一个链表节点（最终通过链表节点的值来获取键值对的值），这样可以避免hash冲突的情况。
   // 但下面这个while判断，并不是解决hash冲突，而是更新某一节点的值（根本来讲，它所指向的键值对的值）
-  node *curbucket = hashtable->buckets[index];
+  node *curbucket = hashmap->buckets[index];
   while (curbucket) {
     if (curbucket->pair->key == key) {
       strcpy_s(curbucket->pair->val, strlen(curbucket->pair->val) + 1, val);
@@ -168,17 +167,17 @@ void put(hashtablechaining *hashtable, int key, const char *val) {
   newnode->pair = newpair;
   // 请注意，以下这两步，实际上让bucket[index]这个node*变量，这个链表节点，始终是链表的头节点。
   newnode->nextnode =
-      hashtable->buckets
+      hashmap->buckets
           [index]; // buckets[index]本质上存放的是node的地址，nextnode同样的存放的是node的地址。
-  hashtable->buckets[index] = newnode;
-  hashtable->size++;
+  hashmap->buckets[index] = newnode;
+  hashmap->size++;
 }
 
 /*删除键值对操作*/
-void removeitem(hashtablechaining *hashtable, int key) {
+void removeitem(hashmapchaining *hashmap, int key) {
 
-  int index = hashfunc(hashtable, key);
-  node *curbucket = hashtable->buckets[index];
+  int index = hashfunc(hashmap, key);
+  node *curbucket = hashmap->buckets[index];
   node *prebucket = NULL;
   while (curbucket) {
     if (curbucket->pair->key == key) {
@@ -186,12 +185,12 @@ void removeitem(hashtablechaining *hashtable, int key) {
       if (prebucket) {
         prebucket->nextnode = curbucket->nextnode;
       } else {
-        hashtable->buckets[index] = curbucket->nextnode;
+        hashmap->buckets[index] = curbucket->nextnode;
       }
       // 释放内存
       free(curbucket->pair);
       free(curbucket);
-      hashtable->size--;
+      hashmap->size--;
       return;
     }
     prebucket = curbucket;
@@ -200,9 +199,9 @@ void removeitem(hashtablechaining *hashtable, int key) {
 }
 
 /*打印hash表*/
-void printhash(hashtablechaining *hashtable) {
-  for (int i = 0; i < hashtable->capacity; i++) {
-    node *curbucket = hashtable->buckets[i];
+void printhash(hashmapchaining *hashmap) {
+  for (int i = 0; i < hashmap->capacity; i++) {
+    node *curbucket = hashmap->buckets[i];
     printf("[");
     while (curbucket) {
       printf("%d -> %s, ", curbucket->pair->key, curbucket->pair->val);
@@ -215,35 +214,35 @@ void printhash(hashtablechaining *hashtable) {
 /*driver code*/
 int main() {
   // 初始化hash表
-  hashtablechaining *hashtable = newhashtable();
+  hashmapchaining *hashmap = newhashmap();
 
   // 在hash表几次添加键值对，同时测试扩容机制
-  put(hashtable, 12836, "小哈");
-  put(hashtable, 15937, "小啰");
-  put(hashtable, 16750, "小算");
+  put(hashmap, 12836, "小哈");
+  put(hashmap, 15937, "小啰");
+  put(hashmap, 16750, "小算");
   printf("\n添加完成后，哈希表为\nKey -> Value\n");
-  printhash(hashtable);
+  printhash(hashmap);
 
   // 测试扩容机制
-  put(hashtable, 13276, "小法");
+  put(hashmap, 13276, "小法");
   printf("\n扩容，第四次添加完成后，哈希表为\nKey -> Value\n");
-  printhash(hashtable);
+  printhash(hashmap);
 
   // 继续添加
-  put(hashtable, 10583, "小呀");
+  put(hashmap, 10583, "小呀");
   printf("\n最终添加完成后，哈希表为\nKey -> Value\n");
-  printhash(hashtable);
+  printhash(hashmap);
 
   // 查询操作：向hash表中输入键key，得到值Value
-  char *namevalue = get(hashtable, 15937);
+  char *namevalue = get(hashmap, 15937);
   printf("\n输入学号 15937，查询到姓名 %s\n", namevalue);
 
   // 删除操作，在hash中删除键值对
-  removeitem(hashtable, 12836);
-  removeitem(hashtable, 15937);
+  removeitem(hashmap, 12836);
+  removeitem(hashmap, 15937);
   printf("\n删除号码 12836 和 15937 后，哈希表为\nKey -> Value\n");
-  printhash(hashtable);
+  printhash(hashmap);
 
   // 释放hash表占用的空间
-  delhashtable(hashtable);
+  delhashmap(hashmap);
 }

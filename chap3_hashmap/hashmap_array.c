@@ -3,16 +3,15 @@
 #include <string.h>
 
 /*hash表默认大小*/
-#define HASHTABLE_CAPACITY 100
+#define HASHMAP_CAPACITY 100
 
 /*键值对 key-value*/
-typedef struct pair
-{
+typedef struct pair {
   int key;
   char *val; // 值作为指针型变量储存。char*，字符指针型。
   // 1，char型变量只占一个字节。一般表示一个字母。
   // 2，char*型变量占8个字节。实际储存的是地址。
-  // 3, 声明为指针类型允许val指向任意长度的字符串。
+  // 3, 声明为指针类型，允许val指向任意长度的字符串。
   // 4，不使用int*，是未来避免类型转换带来的麻烦。
   // 5，不使用string*：因为c语言标准库中并没有c类似c++那样的std::string字符串类型。在c中，字符串通常是以字符数组的形式表示，以空字符‘\0’结尾。
   // 此外，使用char*，可以直接操作字符数组来进行字符串的处理，而不需要考虑std::std型所设计的动态内存分配和释放等复杂性问题。且兼容性更好。
@@ -20,68 +19,58 @@ typedef struct pair
 
 /* 键值对的集合*/
 // 这个集合的存在，是为了方便遍历键值对
-typedef struct tableset
-{
+typedef struct mapset {
   void *
       set; // 可能是遍历值，也可能是遍历键，也可能是遍历键值对，所以暂时定义为void，需要时进行类型转换。
   int len; // 记录键值对的长度，方便遍历或者打印。
-} tableset;
+} mapset;
 
 /*基于数组实现的hash表*/
 // 这个hash表，里面所装的东西是一个又一个地址。
-typedef struct arrayhash
-{
+typedef struct arrayhash {
   // 初始化一个数组。数组里面放的是pair*变量，即键值对变量。
   // 这个时候我们一般也把这个键值对称作一个“桶”
-  pair *buckets[HASHTABLE_CAPACITY]; // 初始化一个最大容量
+  pair *buckets[HASHMAP_CAPACITY]; // 初始化一个最大容量
 } arrayhash;
 
 /*构造函数*/
-arrayhash *newhash()
-{
-  arrayhash *hashtable = (arrayhash *)malloc(sizeof(arrayhash));
+arrayhash *newhash() {
+  arrayhash *hashmap = (arrayhash *)malloc(sizeof(arrayhash));
   // 修改的源代码：添加以下循环。原来的构造函数并没有初始化hash表中的桶，运行时出现了段错误。
-  for (int i = 0; i < HASHTABLE_CAPACITY; i++)
-  {
-    hashtable->buckets[i] = NULL;
+  for (int i = 0; i < HASHMAP_CAPACITY; i++) {
+    hashmap->buckets[i] = NULL;
   }
-  return hashtable;
+  return hashmap;
 }
 
 /*析构函数*/
-void delhashtable(arrayhash *hashtable)
-{
-  for (int i = 0; i < HASHTABLE_CAPACITY; i++)
-  {
-    if (hashtable->buckets[i] != NULL)
-    {
-      free(hashtable->buckets[i]->val);
-      free(hashtable->buckets[i]);
+void delhashmap(arrayhash *hashmap) {
+  for (int i = 0; i < HASHMAP_CAPACITY; i++) {
+    if (hashmap->buckets[i] != NULL) {
+      free(hashmap->buckets[i]->val);
+      free(hashmap->buckets[i]);
     }
   }
-  free(hashtable);
-  // 注意，在构造函数和添加操作函数中，hashtable，bucket，bucket->val都是利用malloc动态分配内存的。所以在析构函数中会有三种释放。
+  free(hashmap);
+  // 注意，在构造函数和添加操作函数中，hashmap，bucket，bucket->val都是利用malloc动态分配内存的。所以在析构函数中会有三种释放。
 }
 
 /*hash函数*/
-int hashfunc(int key)
-{
-  int index = key % HASHTABLE_CAPACITY;
+int hashfunc(int key) {
+  int index = key % HASHMAP_CAPACITY;
   return index;
 }
 
 /*查询操作*/
 // 加const修饰传入的形参，表示传入的数据不可改变。更加符合“查询”的定义
-const char *get(const arrayhash *hashtable, const int key)
-{
+const char *get(const arrayhash *hashmap, const int key) {
 
   int index = hashfunc(
       key); // 利用hash函数将key的输入空间映射为数组所有索引所构成的合法的输出空间
   const pair *pair =
-      hashtable->buckets
+      hashmap->buckets
           [index]; // 从桶中获取键值对,当然这种说法也只是比较省略的说法。
-  if (pair == NULL)
-  {
+  if (pair == NULL) {
     return NULL;
   }
   return pair->val; // 最终目的是返回键值对的值。注意这里的val是一个指针型变量
@@ -89,8 +78,7 @@ const char *get(const arrayhash *hashtable, const int key)
 
 /*添加操作*/
 // 添加键值对。构造函数仅仅是构造了容量大小的空桶,要往里面放键值对才有实际意义。
-void put(arrayhash *hashtable, const int key, const char *val)
-{
+void put(arrayhash *hashmap, const int key, const char *val) {
   pair *newpair = (pair *)malloc(sizeof(pair));
   newpair->key = key;
   newpair->val = malloc(strlen(val) + 1);
@@ -103,7 +91,7 @@ void put(arrayhash *hashtable, const int key, const char *val)
   // 改用strcpy_s，这个字符复制函数会在复制的时候检测目标缓冲区的大小(第二个参数，即strlen(val)+1)，并且只有在目标缓冲区足够大的时候才会执行复制操作，避免缓冲区溢出。
   strcpy_s(newpair->val, strlen(newpair->val) + 1, val);
   int index = hashfunc(key);
-  hashtable->buckets[index] = newpair; // 最后添加到bucket中
+  hashmap->buckets[index] = newpair; // 最后添加到bucket中
 }
 
 /*对c语言中的char*和strlen()的进一步补充:
@@ -124,8 +112,7 @@ void put(arrayhash *hashtable, const int key, const char *val)
 
 /*删除操作*/
 // 删除某一key值所对应的键值对
-void removeitem(arrayhash *hashtabel, const int key)
-{
+void removeitem(arrayhash *hashtabel, const int key) {
   int index = hashfunc(key);
   free(hashtabel->buckets[index]->val);
   free(hashtabel->buckets[index]);
@@ -149,33 +136,28 @@ void removeitem(arrayhash *hashtabel, const int key)
 
 /*获取所有的键值对*/
 // 这段代码将hash表中的键值对转换为一个键值对的集合，以方便打印。
-void pairset(arrayhash *hashtable, tableset *set)
-{
+void pairset(arrayhash *hashmap, mapset *set) {
   // 定义一个指向pair结构体（而非pair指针)的数组
   pair *entries;
   int index = 0, total = 0;
   /*统计有效键值对数量*/
-  for (int i = 0; i < HASHTABLE_CAPACITY; i++)
-  {
-    if (hashtable->buckets[i] != NULL)
-    {
+  for (int i = 0; i < HASHMAP_CAPACITY; i++) {
+    if (hashmap->buckets[i] != NULL) {
       total++;
     }
   }
   // 为指针所管理的地址分配足够的内存
   entries = malloc(sizeof(pair) * total);
-  for (int i = 0; i < HASHTABLE_CAPACITY; i++)
-  {
-    if (hashtable->buckets[i] != NULL)
-    {
+  for (int i = 0; i < HASHMAP_CAPACITY; i++) {
+    if (hashmap->buckets[i] != NULL) {
       // 为集合的键赋值
-      entries[index].key = hashtable->buckets[i]->key;
+      entries[index].key = hashmap->buckets[i]->key;
       // 为集合的值赋值,val为字符指针，分两步：
       // 1，为指针所指向的地址，存放字符串的地址分配足够大小的内存
-      entries[index].val = malloc(strlen(hashtable->buckets[i]->val) + 1);
+      entries[index].val = malloc(strlen(hashmap->buckets[i]->val) + 1);
       // 2,将当前桶中的值复制到新分配的内存空间中，完成赋值
       strcpy_s(entries[index].val, strlen(entries[index].val) + 1,
-               hashtable->buckets[i]->val);
+               hashmap->buckets[i]->val);
       index++;
     }
   }
@@ -184,25 +166,20 @@ void pairset(arrayhash *hashtable, tableset *set)
 }
 
 /*获取所有键*/
-void keyset(arrayhash *hashtable, tableset *set)
-{
+void keyset(arrayhash *hashmap, mapset *set) {
   int *keys;
   int i = 0, index = 0;
   int total = 0;
   // 统计有效键值对数量
-  for (i = 0; i < HASHTABLE_CAPACITY; i++)
-  {
-    if (hashtable->buckets[i] != NULL)
-    {
+  for (i = 0; i < HASHMAP_CAPACITY; i++) {
+    if (hashmap->buckets[i] != NULL) {
       total++;
     }
   }
   keys = malloc(total * sizeof(int));
-  for (i = 0; i < HASHTABLE_CAPACITY; i++)
-  {
-    if (hashtable->buckets[i] != NULL)
-    {
-      keys[index] = hashtable->buckets[i]->key;
+  for (i = 0; i < HASHMAP_CAPACITY; i++) {
+    if (hashmap->buckets[i] != NULL) {
+      keys[index] = hashmap->buckets[i]->key;
       index++;
     }
   }
@@ -211,23 +188,18 @@ void keyset(arrayhash *hashtable, tableset *set)
 }
 
 /*获取所有的值*/
-void valueset(arrayhash *hashtabel, tableset *set)
-{
+void valueset(arrayhash *hashtabel, mapset *set) {
   char **vals;
   int i = 0, index = 0, total = 0;
   /*统计有效键值对数量*/
-  for (i = 0; i < HASHTABLE_CAPACITY; i++)
-  {
-    if (hashtabel->buckets[i] != NULL)
-    {
+  for (i = 0; i < HASHMAP_CAPACITY; i++) {
+    if (hashtabel->buckets[i] != NULL) {
       total++;
     }
   }
   vals = malloc(total * sizeof(char *));
-  for (i = 0; i < HASHTABLE_CAPACITY; i++)
-  {
-    if (hashtabel->buckets[i] != NULL)
-    {
+  for (i = 0; i < HASHMAP_CAPACITY; i++) {
+    if (hashtabel->buckets[i] != NULL) {
       vals[index] = hashtabel->buckets[i]->val;
       index++;
     }
@@ -237,14 +209,12 @@ void valueset(arrayhash *hashtabel, tableset *set)
 }
 
 /*打印hash表*/
-void printhash(arrayhash *hashtable)
-{
+void printhash(arrayhash *hashmap) {
   int i;
-  tableset set;
-  pairset(hashtable, &set);
+  mapset set;
+  pairset(hashmap, &set);
   pair *entries = (pair *)set.set;
-  for (i = 0; i < set.len; i++)
-  {
+  for (i = 0; i < set.len; i++) {
     printf("%d -> %s\n", entries[i].key, entries[i].val);
   }
 
@@ -252,56 +222,53 @@ void printhash(arrayhash *hashtable)
 }
 
 /*dirver code*/
-int main()
-{
+int main() {
   // 初始化hash表
-  arrayhash *hashtable = newhash();
+  arrayhash *hashmap = newhash();
   // 添加操作，在hash表中添加键值对，并打印
-  put(hashtable, 24811, "第一");
-  put(hashtable, 24812, "第二");
-  put(hashtable, 24813, "第三");
-  put(hashtable, 24814, "第四");
-  put(hashtable, 24815, "第五");
-  put(hashtable, 24416, "世界");
-  put(hashtable, 24417, "hello");
-  put(hashtable, 24418, "World");
-  put(hashtable, 24219, "start");
-  put(hashtable, 24440, "algorithm");
-  put(hashtable, 24702, "问题解决");
+  put(hashmap, 24811, "第一");
+  put(hashmap, 24812, "第二");
+  put(hashmap, 24813, "第三");
+  put(hashmap, 24814, "第四");
+  put(hashmap, 24815, "第五");
+  put(hashmap, 24416, "世界");
+  put(hashmap, 24417, "hello");
+  put(hashmap, 24418, "World");
+  put(hashmap, 24219, "start");
+  put(hashmap, 24440, "algorithm");
+  put(hashmap, 24702, "问题解决");
   // 桶全部填满了。填满了才能保证获取操作正确。这个明天再补充。源代码的问题主要在key值上
   printf("\n打印完成后，hash表为\nKey -> Value\n");
-  printhash(hashtable);
+  printhash(hashmap);
 
   // 查询操作，向hash表中输入键key，得到值value
-  const char *word = get(hashtable, 24410);
+  const char *word = get(hashmap, 24410);
   printf("\n输入号码24410,，查询到单词为 %s\n", word);
 
   // 遍历hash表
   // 遍历键值对：
   printf("\n遍历键值对 key -> value\n");
-  printhash(hashtable);
+  printhash(hashmap);
 
   // 单独遍历键：
-  tableset set;
-  keyset(hashtable, &set);
+  mapset set;
+  keyset(hashmap, &set);
   int *keys = (int *)set.set;
   printf("\n单独遍历键 key\n");
-  for (int i = 0; i < set.len; i++)
-  {
+  for (int i = 0; i < set.len; i++) {
     printf("%d\n", keys[i]);
   }
   free(set.set);
 
   // 单独遍历值
-  valueset(hashtable, &set);
+  valueset(hashmap, &set);
   char **vals = (char **)set.set;
   printf("\n单独遍历值 value\n");
-  for (int i = 0; i < set.len; i++)
-  {
+  for (int i = 0; i < set.len; i++) {
     printf("%s\n", vals[i]);
   }
   free(set.set);
 
-  delhashtable(hashtable);
+  delhashmap(hashmap);
   return 0;
 }
