@@ -14,7 +14,10 @@
 /*键值对结构体*/
 typedef struct pair {
   int key;
-  char val[MAX_SIZE]; // 数组表示字符，注意不同于先前所写的那个简单hash
+  char val[MAX_SIZE];
+  // char *val val存放一个地址。
+  // char val[size],val本身也是存放一个地址，表示val[0]地址，
+  // 即这个里面放着一个个字符的数组的首地址
 
 } pair;
 
@@ -49,6 +52,8 @@ typedef struct hashmapchaining {
   // 但是bucket[i]，首先意味着规定bucket所指向的地址是一块连续分布的内存，可以通过计算偏移量来访问这块地址里的一个又一个元素，即node*变量
   // bucket[i]是node*，而bucket是node**。
   // 由此，最后对键值对的访问，就变成了bucket[i]->pair->key，bucket[i]->pair->value
+  //
+  // 补充：就是bucket存放的是一个地址，而这个地址最终指向的是一片内存的地址，在这片内存里，又放有很多的地址bucket[i]，而bucket最终获取的其实是这一片内存地址的首地址，等价于bucket[0]
 
 } hashmapchaining;
 
@@ -61,7 +66,7 @@ hashmapchaining *newhashmap() {
   hashmap->extendratio = 2;
   hashmap->buckets = (node **)malloc(hashmap->capacity * sizeof(node *));
   for (int i = 0; i < hashmap->capacity; i++) {
-    hashmap->buckets[i] = NULL; // 全部初始化为空桶
+    hashmap->buckets[i] = NULL; // 全部初始化为空桶，避免段错误
   }
   return hashmap;
 }
@@ -129,7 +134,7 @@ void extend(hashmapchaining *hashmap) {
       put(hashmap, curbucket->pair->key, curbucket->pair->val);
       node *temp = curbucket;
       curbucket = curbucket->nextnode;
-      // 释放内存
+      // 释放内存，拷贝一个新键值对，就把旧的键值对给释放。
       free(temp->pair);
       free(temp);
     }
@@ -154,10 +159,12 @@ void put(hashmapchaining *hashmap, int key, const char *val) {
       // 若遇到指定的key，则更新对应的val为传入的val
       return;
     }
-    curbucket = curbucket->nextnode;
+    curbucket =
+        curbucket
+            ->nextnode; // 节点的偏倚，而不是索引的偏倚，一切都在单个桶里面进行。
   }
-  // 上述循环完成了对单个桶的遍历，确保所传入的key在这个桶里面是独一无二的，但是这不意味着桶里面没有其它的链表节点。
-  // 若无该key，则将键值对直接添加至链表头部
+  // 上述循环完成了对单个桶的遍历(注意是节点的偏倚而不是数组索引的偏移)，确保所传入的key在这个桶里面是独一无二的，但是这不意味着桶里面没有其它的链表节点。
+  // 若无该key，则将键值对直接添加至这个桶的头部，即链表的头部。
   // 1,初始化一个新的键值对
   pair *newpair = (pair *)malloc(sizeof(pair));
   newpair->key = key;                                    // 先拷贝键
@@ -179,12 +186,15 @@ void removeitem(hashmapchaining *hashmap, int key) {
   int index = hashfunc(hashmap, key);
   node *curbucket = hashmap->buckets[index];
   node *prebucket = NULL;
+  // 遍历单个桶
   while (curbucket) {
     if (curbucket->pair->key == key) {
       // 从中删除键值对
       if (prebucket) {
+        // 链表，改变指向，让curbucket不被指到，就可以完成删除。
         prebucket->nextnode = curbucket->nextnode;
       } else {
+        // 在首次循环即找到对应的键，即头节点就是要被抹除，即逻辑上更新的节点。
         hashmap->buckets[index] = curbucket->nextnode;
       }
       // 释放内存

@@ -1,3 +1,4 @@
+
 #include "../utils/common.h"
 #include <stdlib.h>
 #include <string.h>
@@ -21,7 +22,7 @@ typedef struct pair {
 // 这个集合的存在，是为了方便遍历键值对
 typedef struct mapset {
   void *
-      set; // 可能是遍历值，也可能是遍历键，也可能是遍历键值对，所以暂时定义为void，需要时进行类型转换。总之，是一个存放地址的变量。
+      set; // 可能是遍历值，也可能是遍历键，也可能是遍历键值对，所以暂时定义为void，需要时进行类型转换。
   int len; // 记录键值对的长度，方便遍历或者打印。
 } mapset;
 
@@ -30,9 +31,7 @@ typedef struct mapset {
 typedef struct arrayhash {
   // 初始化一个数组。数组里面放的是pair*变量，即键值对变量。
   // 这个时候我们一般也把这个键值对称作一个“桶”
-  // 初始化一个最大容量。请注意，pair *bucekts不等于
-  // pair*bucekts[HASHMAP_CAPACITY]。前者仅仅表示bucket存放有一个指向pair型变量的地址，而后者则表示bucket里面包含了cap个指向pair变量的地址，是可以作为数组来理解的。
-  pair *buckets[HASHMAP_CAPACITY];
+  pair *buckets[HASHMAP_CAPACITY]; // 初始化一个最大容量
 } arrayhash;
 
 /*构造函数*/
@@ -63,14 +62,15 @@ int hashfunc(int key) {
   return index;
 }
 
-/*查询操作,传入key，查询值*/
+/*查询操作*/
 // 加const修饰传入的形参，表示传入的数据不可改变。更加符合“查询”的定义
 const char *get(const arrayhash *hashmap, const int key) {
-  // 利用hash函数将key的输入空间映射为数组所有索引所构成的合法的输出空间
-  int index = hashfunc(key);
-  // 从桶中获取键值对,当然这种说法也只是比较省略的说法。
-  ////bucket[index]表示这个数组里，单一一个元素，而这个元素的类型，的确为pair指针型
-  const pair *pair = hashmap->buckets[index];
+
+  int index = hashfunc(
+      key); // 利用hash函数将key的输入空间映射为数组所有索引所构成的合法的输出空间
+  const pair *pair =
+      hashmap->buckets
+          [index]; // 从桶中获取键值对,当然这种说法也只是比较省略的说法。
   if (pair == NULL) {
     return NULL;
   }
@@ -79,7 +79,6 @@ const char *get(const arrayhash *hashmap, const int key) {
 
 /*添加操作*/
 // 添加键值对。构造函数仅仅是构造了容量大小的空桶,要往里面放键值对才有实际意义。
-// 添加键值对，更具体地说，就是给hash表里的空桶赋值。
 void put(arrayhash *hashmap, const int key, const char *val) {
   pair *newpair = (pair *)malloc(sizeof(pair));
   newpair->key = key;
@@ -139,6 +138,8 @@ void removeitem(arrayhash *hashtabel, const int key) {
 /*获取所有的键值对*/
 // 这段代码将hash表中的键值对转换为一个键值对的集合，以方便打印。
 void pairset(arrayhash *hashmap, mapset *set) {
+  // 定义一个指向pair结构体（而非pair指针)的数组
+  pair *entries;
   int index = 0, total = 0;
   /*统计有效键值对数量*/
   for (int i = 0; i < HASHMAP_CAPACITY; i++) {
@@ -147,12 +148,12 @@ void pairset(arrayhash *hashmap, mapset *set) {
     }
   }
   // 为指针所管理的地址分配足够的内存
-  pair *entries = (pair *)malloc(sizeof(pair) * total);
+  entries = malloc(sizeof(pair) * total);
   for (int i = 0; i < HASHMAP_CAPACITY; i++) {
     if (hashmap->buckets[i] != NULL) {
-      // 为集合的key赋值
+      // 为集合的键赋值
       entries[index].key = hashmap->buckets[i]->key;
-      // 为集合的value赋值,val为字符指针，分两步：
+      // 为集合的值赋值,val为字符指针，分两步：
       // 1，为指针所指向的地址，存放字符串的地址分配足够大小的内存
       entries[index].val = malloc(strlen(hashmap->buckets[i]->val) + 1);
       // 2,将当前桶中的值复制到新分配的内存空间中，完成赋值
@@ -161,13 +162,13 @@ void pairset(arrayhash *hashmap, mapset *set) {
       index++;
     }
   }
-  set->set =
-      entries; // set->set本来是void*，而这里的entries是pair*，后面的keys是int*，再后面的vals是(char*)*。是可以这么写的，类型转换
+  set->set = entries;
   set->len = total;
 }
 
 /*获取所有键*/
 void keyset(arrayhash *hashmap, mapset *set) {
+  int *keys;
   int i = 0, index = 0;
   int total = 0;
   // 统计有效键值对数量
@@ -176,7 +177,7 @@ void keyset(arrayhash *hashmap, mapset *set) {
       total++;
     }
   }
-  int *keys = (int *)malloc(total * sizeof(int));
+  keys = malloc(total * sizeof(int));
   for (i = 0; i < HASHMAP_CAPACITY; i++) {
     if (hashmap->buckets[i] != NULL) {
       keys[index] = hashmap->buckets[i]->key;
@@ -189,6 +190,7 @@ void keyset(arrayhash *hashmap, mapset *set) {
 
 /*获取所有的值*/
 void valueset(arrayhash *hashtabel, mapset *set) {
+  char **vals;
   int i = 0, index = 0, total = 0;
   /*统计有效键值对数量*/
   for (i = 0; i < HASHMAP_CAPACITY; i++) {
@@ -196,7 +198,7 @@ void valueset(arrayhash *hashtabel, mapset *set) {
       total++;
     }
   }
-  char **vals = (char **)malloc(total * sizeof(char *));
+  vals = malloc(total * sizeof(char *));
   for (i = 0; i < HASHMAP_CAPACITY; i++) {
     if (hashtabel->buckets[i] != NULL) {
       vals[index] = hashtabel->buckets[i]->val;
@@ -209,10 +211,11 @@ void valueset(arrayhash *hashtabel, mapset *set) {
 
 /*打印hash表*/
 void printhash(arrayhash *hashmap) {
-  mapset set;             // 待传入被赋值
-  pairset(hashmap, &set); // 直接地址传入，不需要拷贝。直接赋值。
-  pair *entries = (pair *)set.set; // 承接地址。类型转换
-  for (int i = 0; i < set.len; i++) {
+  int i;
+  mapset set;
+  pairset(hashmap, &set);
+  pair *entries = (pair *)set.set;
+  for (i = 0; i < set.len; i++) {
     printf("%d -> %s\n", entries[i].key, entries[i].val);
   }
 
@@ -224,19 +227,24 @@ int main() {
   // 初始化hash表
   arrayhash *hashmap = newhash();
   // 添加操作，在hash表中添加键值对，并打印
+  put(hashmap, 24811, "第5");
+  put(hashmap, 24812, "第6");
+  put(hashmap, 24813, "第7");
+  put(hashmap, 24814, "第8");
+  put(hashmap, 24815, "第9");
+  put(hashmap, 24416, "世0");
   put(hashmap, 24417, "hello");
   put(hashmap, 24418, "World");
   put(hashmap, 24219, "start");
   put(hashmap, 24440, "algorithm");
+  put(hashmap, 24702, "11解决");
+  // 桶全部填满了。填满了才能保证获取操作正确。这个明天再补充。源代码的问题主要在key值上
   printf("\n打印完成后，hash表为\nKey -> Value\n");
   printhash(hashmap);
 
   // 查询操作，向hash表中输入键key，得到值value
   const char *word = get(hashmap, 24410);
   printf("\n输入号码24410,，查询到单词为 %s\n", word);
-
-  const char *word2 = get(hashmap, 24219);
-  printf("\n输入号码24219,，查询到单词为 %s\n", word2);
 
   // 遍历hash表
   // 遍历键值对：
