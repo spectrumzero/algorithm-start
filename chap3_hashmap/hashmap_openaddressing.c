@@ -32,7 +32,7 @@ hashmapopen *newhashmap() {
   hashmap->loadthres = 2.0 / 3.0;
   hashmap->extendratio = 2;
   hashmap->buckets = (pair **)malloc(sizeof(pair *) * hashmap->capacity);
-  //  !!!必须添加如下代码，避免段错误！
+  //  修改：添加如下代码，避免段错误
   for (int i = 0; i < hashmap->capacity; i++) {
     hashmap->buckets[i] = NULL;
   }
