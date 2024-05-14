@@ -50,26 +50,37 @@ void printtree(treenode *node, trunk *prev, bool isright) {
   if (node == NULL) {
     return;
   }
+  // 先完成对树枝的初始化，以后再修改
   char *prevstr = "    ";
   trunk *trunk = newtrunk(prev, prevstr);
+  // 先打印右子树，注意，直到右子树打印完之后，才去打印根节点，最后再递归打印左子树。
   printtree(node->right, trunk, true);
+  // 生成当前节点对应的分支样式。根据当前节点的位置和其父节点的情况，我们来确定这个树枝，这个trunk到底长什么样子
+  // 如果当前节点没有父节点(即该节点为根节点)，则直接使用”———“作为分支样式
   if (prev == NULL) {
     trunk->str = "———";
-  } else if (isright) {
+  }
+  // 如果当前节点是其父节点的右子节点，则使用下述分支样式
+  else if (isright) {
     trunk->str = "/———";
     prevstr = "   |";
-  } else {
+  }
+  // 如果当前节点是其父节点的左子节点，则使用下述分支样式
+  else {
     trunk->str = "\\———";
     prev->str = prevstr;
   }
+
+  // 打印生成的分支样式和当前节点的值
   showtrunks(trunk);
   printf("%d\n", node->val);
 
+  // 更新分支样式，确保左子树的内容会在当前节点之后打印
   if (prev != NULL) {
     prev->str = prevstr;
   }
   trunk->str = "   |";
-
+  // 递归打印左子树
   printtree(node->left, trunk, false);
 }
 
