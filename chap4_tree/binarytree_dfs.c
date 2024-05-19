@@ -18,15 +18,22 @@ typedef struct treenode {
   struct treenode *left;
 } treenode;
 
-/*将列表反序列化为二叉树：递归*/
+/*将列表/数组反序列化为二叉树：递归*/
 treenode *arrayTotreeDFS(int *arr, int size, int i) {
   if (i < 0 || i >= size || arr[i] == INT_MAX) {
     return NULL;
   }
   treenode *root = (treenode *)malloc(sizeof(treenode));
+
+  // 注意，其实这里的root->val
+  // =arr[i];可以放在不同的位置，只是影响到构造的顺序（前序/中序/后续），而不影响最后结果的完成
   root->val = arr[i];
+  // 所以，递归是构造二叉树的最佳方法吧
+  // 首先构造左子树
   root->left = arrayTotreeDFS(arr, size, 2 * i + 1);
+  // 然后构造右子树
   root->right = arrayTotreeDFS(arr, size, 2 * i + 2);
+
   return root;
 }
 
@@ -42,7 +49,9 @@ void preorder(treenode *root, int *size) {
   }
   // 访问优先级：根节点->左子树->右子树
   arr[(*size)++] = root->val;
+  // 左子树
   preorder(root->left, size);
+  // 右子树
   preorder(root->right, size);
 }
 
@@ -53,7 +62,7 @@ void inorder(treenode *root, int *size) {
   }
   // 访问优先级：左子树-》根节点-》右子树
   inorder(root->left, size);
-  arr[(*size)++] = root->val; // 解size引用
+  arr[(*size)++] = root->val; // 解size引用，并实时更新
   inorder(root->right, size);
 }
 
@@ -155,6 +164,7 @@ int main() {
 
   // 前序遍历
   // 初始化辅助数组
+  // size这里的用途是为了“凑数”，凑参数，但是，当它被以地址的形式传入到遍历的函数之中后，它实际上记录了打印数组的数组的元素数量。
   size = 0;
   preorder(root, &size);
   printf("前序遍历的节点打印序列 = ");
