@@ -1,0 +1,6 @@
+require("module")
+print(module.cons)
+print("Lua executable path: " .. arg[-1])
+print(package.path)
+local lfs_path = package.searchpath("lfs", package.path)
+print("lfs 模块路径:", lfs_path)
