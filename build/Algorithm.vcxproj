@@ -317,7 +317,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="E:\lazycoding\Algorithm\chap4_tree\5_binarysearchtree.c" />
+    <ClCompile Include="E:\lazycoding\Algorithm\chap4_tree\6_avltree.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="E:\lazycoding\Algorithm\build\ZERO_CHECK.vcxproj">
