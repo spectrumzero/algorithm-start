@@ -144,7 +144,7 @@ void printheap(int *arr, int size) {
 /*Driver Code*/
 int main() {
   // 初始化大顶堆
-  int nums[] = {9, 8, 6, 6, 7, 5, 2, 1, 4, 3, 6, 2};
+  int nums[] = {9, 8, 6, 6, 7, 5, 2, 1, 4, 3, 6, 2, 10, 1, 20, 11};
   maxheap *heap = newheap(nums, sizeof(nums) / sizeof(int));
   printf("输入数组并建堆后\n");
   printheap(heap->data, heap->size);
@@ -153,8 +153,8 @@ int main() {
   printf("\n堆顶元素为 %d\n", peek(heap));
 
   // 元素入堆
-  push(heap, 7);
-  printf("\n元素 7 入堆后\n");
+  push(heap, 19);
+  printf("\n元素 19 入堆后\n");
   printheap(heap->data, heap->size);
 
   // 堆顶元素出堆
