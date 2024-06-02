@@ -167,8 +167,7 @@ int main() {
   // 初始化一个数组
   // 使用INT_MAX代表空位null，显式显示所有的none
   // 注意：以下数组为静态数组
-  int arr[] = {1, 2,       3,       4,  INT_MAX, 6,       7, 8,
-               9, INT_MAX, INT_MAX, 12, 28,      INT_MAX, 15};
+  int arr[] = {1, 2, 3, 4, INT_MAX, 6, 7, 8, 9, INT_MAX, INT_MAX, 12, 28, INT_MAX, 15};
   // 对于静态数组，可以用sizeof的方式去计算数组中元素的实际大小
   int arrcapacity = sizeof(arr) / sizeof(arr[0]);
   // 验证数组索引表示和二叉树的一一对应的关系，唯一地表示一个二叉树
@@ -186,12 +185,9 @@ int main() {
   int i = 5;
   int l = getleftindex(i), r = getrightindex(i), p = getparentindex(i);
   printf("\n当前节点的索引为 %d，值为 %d\n", i, getval(abt, i));
-  printf("其左节点的索引为 %d，值为 %d\n", l,
-         l < arrcapacity ? getval(abt, l) : INT_MAX);
-  printf("其右节点的索引为 %d，值为 %d\n", r,
-         r < arrcapacity ? getval(abt, r) : INT_MAX);
-  printf("其父节点的索引为 %d，值为 %d\n", p,
-         p < arrcapacity ? getval(abt, p) : INT_MAX);
+  printf("其左节点的索引为 %d，值为 %d\n", l, l < arrcapacity ? getval(abt, l) : INT_MAX);
+  printf("其右节点的索引为 %d，值为 %d\n", r, r < arrcapacity ? getval(abt, r) : INT_MAX);
+  printf("其父节点的索引为 %d，值为 %d\n", p, p < arrcapacity ? getval(abt, p) : INT_MAX);
 
   // 遍历树
   int returnSize; // 计算列表的实际大小，方便打印

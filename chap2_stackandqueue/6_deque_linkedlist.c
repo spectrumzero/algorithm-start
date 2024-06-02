@@ -1,8 +1,7 @@
 #include "../head/deque_linkedlist.h"
 /*在双向链表节点的基础上，实现双向队列*/
 typedef struct {
-  doublelistnode *front,
-      *rear; // 头节点front，尾节点rear。好了，这就是链表了，链表就是节点的链接。
+  doublelistnode *front, *rear; // 头节点front，尾节点rear。好了，这就是链表了，链表就是节点的链接。
   int quesize; // 双向队列的实际长度
 } dequelinkedlist;
 
@@ -45,9 +44,7 @@ void push(dequelinkedlist *deque, int num, bool isfront) {
   else if (isfront) {
     // 将node添加至链表头部
     deque->front->prev = node; // 将front->prev(NULL)赋值为node。方向一。
-    node->next =
-        deque
-            ->front; // 只需要在后面建立链接，不需要管前面，使其为NULL。方向二。
+    node->next = deque->front; // 只需要在后面建立链接，不需要管前面，使其为NULL。方向二。
     deque->front = node; // 最后别忘了更新头节点
   }
   // 队尾入队操作
@@ -55,8 +52,7 @@ void push(dequelinkedlist *deque, int num, bool isfront) {
     // 将node添加至链表队尾
     deque->rear->next = node; // 将rear->next(NULL)赋值为node;方向一。
     // 这是双向节点，不是单向节点。所以光上面的单向链接是不够的。
-    node->prev =
-        deque->rear; // 只需要在前面建立链接，不需要管后面。任其为NULL。方向二。
+    node->prev = deque->rear; // 只需要在前面建立链接，不需要管后面。任其为NULL。方向二。
     deque->rear = node;
   }
   deque->quesize++; // 更新队列长度
@@ -94,8 +90,7 @@ int pop(dequelinkedlist *deque, bool isfront) {
     // 判断原队首指向的下一个节点是否为null，若是，表示front是原队列的唯一一个/最后一个节点，跳过判断，直接将front赋值为null即可，表示删除。
     // 除此之外，空指针null->???会导致未定义的行为。即它不应该指向任何东西。
     if (fnext) {
-      fnext->prev =
-          NULL; // 表示fnext节点为首节点，往前不指向任何东西。断绝和front的关联。方向一。
+      fnext->prev = NULL; // 表示fnext节点为首节点，往前不指向任何东西。断绝和front的关联。方向一。
       deque->front->next =
           NULL; // front->frev本身是NULL，所以不去管，这里则彻底让原front在逻辑上断链了。方向二。
       deldoublelistnode(deque->front); // 内存上清理

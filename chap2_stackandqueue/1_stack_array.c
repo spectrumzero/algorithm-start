@@ -15,7 +15,7 @@ arraystack *newarraystack() {
   // 初始化一个大容量，避免扩容
   stack->data = malloc(sizeof(int) * MAX_SIZE); // 5000大小的数组元素容量
   stack->size = 0;                              // 实际容量初始化为0
-  return stack; // 不返回就没有意义了哈哈。
+  return stack;                                 // 不返回就没有意义了哈哈。
 }
 
 /*析构函数 */
@@ -94,13 +94,11 @@ int main() {
   printf("栈的长度 size = %d\n", size);
 
   // 判断栈是否为空
-  bool empty =
-      isempty(stack); // 这里用bool型变量empty接收isempty函数的结果，若empty
-                      // = 1，表明为真，即空。
+  bool empty = isempty(stack); // 这里用bool型变量empty接收isempty函数的结果，若empty
+                               // = 1，表明为真，即空。
   printf("栈是否为空 = %s\n",
-         empty ? "true"
-               : "false"); // 三目运算符，如果empty =
-                           // 1，则选择第一个表达式，如果为0，则是第二个表达式。
+         empty ? "true" : "false"); // 三目运算符，如果empty =
+                                    // 1，则选择第一个表达式，如果为0，则是第二个表达式。
 
   // 释放内存
   delarraystack(stack); // 前面定义了释放方式

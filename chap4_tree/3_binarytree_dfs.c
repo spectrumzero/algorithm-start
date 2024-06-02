@@ -38,9 +38,7 @@ treenode *arrayTotreeDFS(int *arr, int size, int i) {
 }
 
 /*将列表反序列化为二叉树*/
-treenode *arraytotree(int *arr, int size) {
-  return arrayTotreeDFS(arr, size, 0);
-}
+treenode *arraytotree(int *arr, int size) { return arrayTotreeDFS(arr, size, 0); }
 
 /*前序遍历*/
 void preorder(treenode *root, int *size) {

@@ -156,8 +156,7 @@ void pairset(arrayhash *hashmap, mapset *set) {
       // 1，为指针所指向的地址，存放字符串的地址分配足够大小的内存
       entries[index].val = malloc(strlen(hashmap->buckets[i]->val) + 1);
       // 2,将当前桶中的值复制到新分配的内存空间中，完成赋值
-      strcpy_s(entries[index].val, strlen(entries[index].val) + 1,
-               hashmap->buckets[i]->val);
+      strcpy_s(entries[index].val, strlen(entries[index].val) + 1, hashmap->buckets[i]->val);
       index++;
     }
   }
@@ -209,8 +208,8 @@ void valueset(arrayhash *hashtabel, mapset *set) {
 
 /*打印hash表*/
 void printhash(arrayhash *hashmap) {
-  mapset set;             // 待传入被赋值
-  pairset(hashmap, &set); // 直接地址传入，不需要拷贝。直接赋值。
+  mapset set;                      // 待传入被赋值
+  pairset(hashmap, &set);          // 直接地址传入，不需要拷贝。直接赋值。
   pair *entries = (pair *)set.set; // 承接地址。类型转换
   for (int i = 0; i < set.len; i++) {
     printf("%d -> %s\n", entries[i].key, entries[i].val);

@@ -107,9 +107,7 @@ treenode *arrayTotreeDFS(int *arr, int size, int i) {
 }
 
 /*将列表反序列化为二叉树*/
-treenode *arrayTotree(int *arr, int size) {
-  return arrayTotreeDFS(arr, size, 0);
-}
+treenode *arrayTotree(int *arr, int size) { return arrayTotreeDFS(arr, size, 0); }
 
 /*下面要开始二叉树的打印工作(不仅仅是单纯的数字，还有“树枝”（trunk）)，要完成这一工作，要分三步。*/
 

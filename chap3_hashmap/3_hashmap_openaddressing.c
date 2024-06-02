@@ -113,8 +113,7 @@ char *get(hashmapopen *hashmap, int key) {
   // 搜索key对应的桶索引。
   int index = findkbucket(hashmap, key);
   // 若找到键值，则返回对应的val
-  if (hashmap->buckets[index] != NULL &&
-      hashmap->buckets[index] != hashmap->tombstone) {
+  if (hashmap->buckets[index] != NULL && hashmap->buckets[index] != hashmap->tombstone) {
     return hashmap->buckets[index]->val;
   }
   // 若键值对不存在，则返回空字符串
@@ -130,14 +129,12 @@ void put(hashmapopen *hashmap, int key, const char *val) {
   // 搜索key对应的桶索引，步长，一对一。
   int index = findkbucket(hashmap, key);
   // 若找到键值对，则覆盖更新val并返回
-  if (hashmap->buckets[index] != NULL &&
-      hashmap->buckets[index] != hashmap->tombstone) {
+  if (hashmap->buckets[index] != NULL && hashmap->buckets[index] != hashmap->tombstone) {
     // 首先释放原字符指针的地址对应的内存
     free(hashmap->buckets[index]->val);
     // 然后为这个字符指针赋予新的地址和新的内存空间。
     hashmap->buckets[index]->val = (char *)malloc(sizeof(val) + 1);
-    strcpy_s(hashmap->buckets[index]->val,
-             strlen(hashmap->buckets[index]->val) + 1, val);
+    strcpy_s(hashmap->buckets[index]->val, strlen(hashmap->buckets[index]->val) + 1, val);
     hashmap->buckets[index]->val[strlen(val)] = '\0';
     return;
   }
@@ -158,8 +155,7 @@ void removeitem(hashmapopen *hashmap, int key) {
   // 搜索key索对应的桶索引
   int index = findkbucket(hashmap, key);
   // 若找到键值对，则用删除标记覆盖它
-  if (hashmap->buckets[index] != NULL &&
-      hashmap->buckets[index] != hashmap->tombstone) {
+  if (hashmap->buckets[index] != NULL && hashmap->buckets[index] != hashmap->tombstone) {
     // 暂存当前桶所存放的键值对的地址
     pair *delpair = hashmap->buckets[index];
     // 分别释放字符指针和键值对，完成删除
