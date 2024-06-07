@@ -13,15 +13,21 @@ void siftdown(maxheap *heap, int i);
 void siftup(maxheap *heap, int i);
 int parent(maxheap *heap, int i);
 
-/*构造函数，根据切片建堆，从上到下完成堆化*/
+/*构造函数*/
 maxheap *newheap(int nums[], int size) {
   // 所有元素入堆
   maxheap *heap = (maxheap *)malloc(sizeof(maxheap));
   heap->size = size;
+  // 一次性拷贝所有元素入堆
   memcpy(heap->data, nums, size * sizeof(int));
   for (int i = parent(heap, size - 1); i >= 0; i--) {
-    // 堆化除叶节点以外的其它所有节点
+    // 堆化除叶节点以外的其它所有节点，依次对【每个】非叶节点执行从顶至底堆化，进而保证所有以非叶节点为根节点的子树都是符合堆的定义的。进而完成堆的初始化。相对于其它的初始化，堆的初始化要更加麻烦一点，
+    // 建一个合法的堆，是今后正确执行添加、删除节点操作的基础。
+    // 可以理解，这个堆是从下到上构建的。(对每一个节点，是从上到下完成堆化的)
+    // 如果先建立一个空堆，然后依次（而不是像这样一次性地）将元素入堆，然后对该元素进行从底至顶堆化，这样构建的堆是从上到下构建的。构建是会更麻烦一点。
     siftdown(heap, i);
+    // 另外，堆的性质完全二叉树性质叶告诉我们，parent(heap,size-1)在非叶节点中的索引值，是最大的。
+    // 另外，这是for循环的初始化条件，只在循环开始的时候执行一次。条件部分和迭代部分则在每次循环的时候都会检查和执行。
   }
   return heap;
 }
