@@ -11,5 +11,5 @@ include_directories("./head/" "./utils/")
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
-add_executable(Algorithm "./chap5_heap/top_k.c" )
+add_executable(Algorithm "./chap6_graph/undirected_adjacency_matrix.c" )
 

@@ -1,3 +1,0 @@
-E:/lazycoding/Algorithm/build/CMakeFiles/Algorithm.dir
-E:/lazycoding/Algorithm/build/CMakeFiles/ALL_BUILD.dir
-E:/lazycoding/Algorithm/build/CMakeFiles/ZERO_CHECK.dir
