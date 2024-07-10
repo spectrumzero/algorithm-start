@@ -1,4 +1,4 @@
-# 指定clangd-format所在的文件夹及其子文件夹中文件的缩进格式，接受更复杂的配置。
+# 指定clang-format所在的文件夹及其子文件夹中文件的缩进格式，接受更复杂的配置。
 # https://clang.llvm.org/docs/ClangFormatStyleOptions.html
 BasedOnStyle: LLVM
 IndentWidth: 2
