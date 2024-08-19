@@ -134,7 +134,7 @@ void put(hashmapopen *hashmap, int key, const char *val) {
     free(hashmap->buckets[index]->val);
     // 然后为这个字符指针赋予新的地址和新的内存空间。
     hashmap->buckets[index]->val = (char *)malloc(sizeof(val) + 1);
-    strcpy_s(hashmap->buckets[index]->val, strlen(hashmap->buckets[index]->val) + 1, val);
+    strcpy(hashmap->buckets[index]->val, val);
     hashmap->buckets[index]->val[strlen(val)] = '\0';
     return;
   }
@@ -142,7 +142,7 @@ void put(hashmapopen *hashmap, int key, const char *val) {
   pair *newpair = (pair *)malloc(sizeof(pair));
   newpair->key = key;
   newpair->val = (char *)malloc(strlen(val) + 1);
-  strcpy_s(newpair->val, strlen(val) + 1, val);
+  strcpy(newpair->val, val);
   newpair->val[strlen(val)] = '\0';
 
   // 最后更新hash

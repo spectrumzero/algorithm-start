@@ -91,7 +91,7 @@ void put(arrayhash *hashmap, const int key, const char *val) {
 
   // strcpy(newpair->val, val); // clang：strcpy被弃用。
   // 改用strcpy_s，这个字符复制函数会在复制的时候检测目标缓冲区的大小(第二个参数，即strlen(val)+1)，并且只有在目标缓冲区足够大的时候才会执行复制操作，避免缓冲区溢出。
-  strcpy_s(newpair->val, strlen(newpair->val) + 1, val);
+  strcpy(newpair->val, val);
   int index = hashfunc(key);
   hashmap->buckets[index] = newpair; // 最后添加到bucket中
 }
@@ -156,7 +156,7 @@ void pairset(arrayhash *hashmap, mapset *set) {
       // 1，为指针所指向的地址，存放字符串的地址分配足够大小的内存
       entries[index].val = malloc(strlen(hashmap->buckets[i]->val) + 1);
       // 2,将当前桶中的值复制到新分配的内存空间中，完成赋值
-      strcpy_s(entries[index].val, strlen(entries[index].val) + 1, hashmap->buckets[i]->val);
+      strcpy(entries[index].val, hashmap->buckets[i]->val);
       index++;
     }
   }

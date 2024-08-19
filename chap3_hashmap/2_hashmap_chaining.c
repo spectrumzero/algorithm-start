@@ -153,7 +153,7 @@ void put(hashmapchaining *hashmap, int key, const char *val) {
   node *curbucket = hashmap->buckets[index];
   while (curbucket) {
     if (curbucket->pair->key == key) {
-      strcpy_s(curbucket->pair->val, strlen(curbucket->pair->val) + 1, val);
+      strcpy(curbucket->pair->val, val);
       // strcpy(curbucket->pair->val, val); //
       // 若遇到指定的key，则更新对应的val为传入的val
       return;
@@ -164,8 +164,8 @@ void put(hashmapchaining *hashmap, int key, const char *val) {
   // 若无该key，则将键值对直接添加至这个桶的头部，即链表的头部。
   // 1,初始化一个新的键值对
   pair *newpair = (pair *)malloc(sizeof(pair));
-  newpair->key = key;                                    // 先拷贝键
-  strcpy_s(newpair->val, strlen(newpair->val) + 1, val); // 再拷贝值
+  newpair->key = key;        // 先拷贝键
+  strcpy(newpair->val, val); // 再拷贝值
   // 2,初始化一个新的链表节点
   node *newnode = (node *)malloc(sizeof(node));
   newnode->pair = newpair;
