@@ -13,10 +13,12 @@ class HashMapChaining {
     int capacity;                   // 哈希表容量
     double loadThres;               // 触发扩容的负载因子阈值
     int extendRatio;                // 扩容倍数
-    vector<vector<Pair *>> buckets; // 桶数组
+    vector<vector<Pair *>> buckets; // This is a 2D vector where each element of the outer vector is
+                                    // a vector of pointers to Pair objects.
 
   public:
     /* 构造方法 */
+    // use initialization list to initialize members
     HashMapChaining() : size(0), capacity(4), loadThres(2.0 / 3.0), extendRatio(2) {
         buckets.resize(capacity);
     }
@@ -32,14 +34,10 @@ class HashMapChaining {
     }
 
     /* 哈希函数 */
-    int hashFunc(int key) {
-        return key % capacity;
-    }
+    int hashFunc(int key) { return key % capacity; }
 
     /* 负载因子 */
-    double loadFactor() {
-        return (double)size / (double)capacity;
-    }
+    double loadFactor() { return (double)size / (double)capacity; }
 
     /* 查询操作 */
     string get(int key) {
@@ -76,11 +74,17 @@ class HashMapChaining {
     /* 删除操作 */
     void remove(int key) {
         int index = hashFunc(key);
+        // compiler can deduce the type of buckets[index] using auto identifier. the statement below
+        // creates a reference(bucket) of buckets[index]
         auto &bucket = buckets[index];
         // 遍历桶，从中删除键值对
         for (int i = 0; i < bucket.size(); i++) {
             if (bucket[i]->key == key) {
                 Pair *tmp = bucket[i];
+                // bucket.begin returns an iterator pointing to the first element of bucket. The
+                // computing result of iterator+i is the position where element to be deleted
+                // is. More precisely, it computes the iterator pointing to the i-th element (the
+                // one to be erased).
                 bucket.erase(bucket.begin() + i); // 从中删除键值对
                 delete tmp;                       // 释放内存
                 size--;
@@ -91,11 +95,18 @@ class HashMapChaining {
 
     /* 扩容哈希表 */
     void extend() {
-        // 暂存原哈希表
+        // temporarily store the origin hash table to avoid memory leaks.
         vector<vector<Pair *>> bucketsTmp = buckets;
         // 初始化扩容后的新哈希表
         capacity *= extendRatio;
+        // remove all elements from the buckets vector, effectively making it empty.
+        // NOTICE: All elements are destroyed, and if the container holds pointers, the pointed-to
+        // objects are not deleted by clear(). This is an important consideration if you need to
+        // manually manage memory.
         buckets.clear();
+        // change the size of the buckets vector to capacity. After this operation, the vector will
+        // contain `capacity` elements. But you still have to initialize them on your own to
+        // meet your need instead of using these empty instances.
         buckets.resize(capacity);
         size = 0;
         // 将键值对从原哈希表搬运至新哈希表

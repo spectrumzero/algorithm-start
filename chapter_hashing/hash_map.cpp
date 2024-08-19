@@ -9,6 +9,9 @@
 /* Driver Code */
 int main() {
     /* 初始化哈希表 */
+    // This declares an unordered_map named map that maps int keys to string values.
+    // std::unordered_map is a standard container in C++ that is part of the Standard Template
+    // Library (STL). you just need to include <unordered_map> to use it.
     unordered_map<int, string> map;
 
     /* 添加操作 */
@@ -19,6 +22,9 @@ int main() {
     map[13276] = "小法";
     map[10583] = "小鸭";
     cout << "\n添加完成后，哈希表为\nKey -> Value" << endl;
+
+    // printHashMap<unordered_map<int, string>>map; compiler can deduce the type in the angle
+    // brackets automatically.
     printHashMap(map);
 
     /* 查询操作 */
@@ -38,7 +44,10 @@ int main() {
         cout << kv.first << " -> " << kv.second << endl;
     }
     cout << "\n使用迭代器遍历 Key->Value" << endl;
+    // use iterator to traverse the map; map.begin() returns an iterator pointing to the first
+    // element, and map.end() returns an iterator to one past the last element.
     for (auto iter = map.begin(); iter != map.end(); iter++) {
+        // more powerful function
         cout << iter->first << "->" << iter->second << endl;
     }
 
