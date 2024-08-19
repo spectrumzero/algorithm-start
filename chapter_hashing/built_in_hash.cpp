@@ -9,6 +9,10 @@
 /* Driver Code */
 int main() {
     int num = 3;
+    // hash<int> is a function object (functor) provided by the C++ Standard Library. hash<int>()
+    // creates an instance of the std::hash<int> class. It is used to compute a hash value for an
+    // integer (int in this case). size_t is an unsigned integral type used for representing sizes
+    // and indices, with a range from 0 to 2^64 - 1.
     size_t hashNum = hash<int>()(num);
     cout << "整数 " << num << " 的哈希值为 " << hashNum << "\n";
 
